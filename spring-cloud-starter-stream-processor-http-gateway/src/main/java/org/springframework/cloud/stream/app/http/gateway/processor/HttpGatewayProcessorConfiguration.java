@@ -1,5 +1,7 @@
 package org.springframework.cloud.stream.app.http.gateway.processor;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -24,12 +27,9 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.util.MimeType;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
- * A processor module that listens for HTTP requests and emits the body as a message payload.
- * If the Content-Type matches 'text/*' or 'application/json', the payload will be a String, otherwise the payload will be a byte array.
+ * A processor module that listens for HTTP requests and emits the body as a message payload. If the Content-Type
+ * matches 'text/*' or 'application/json', the payload will be a String, otherwise the payload will be a byte array.
  *
  * @author Eric Bottard
  * @author Mark Fisher
@@ -55,7 +55,7 @@ public class HttpGatewayProcessorConfiguration {
     private HttpGatewayProcessorProperties properties;
 
     @Autowired
-    private ResourceLoaderSupport resourceLoadingSupport;
+    private ResourceLoader resourceLoader;
 
     @Bean
     public HttpRequestHandlingEndpointSupport httpSourceString() {
@@ -71,7 +71,8 @@ public class HttpGatewayProcessorConfiguration {
     }
 
     private AsyncContextServletEndpointSpec buildHttpRequestHandlerEndpointSpec(final String... consumes) {
-        return new AsyncContextServletEndpointSpec(new AsyncContextServletMessagingGateway(resourceLoadingSupport),
+        return new AsyncContextServletEndpointSpec(new AsyncContextServletMessagingGateway(
+                new ResourceLoaderSupport(resourceLoader, properties.getResourceLocationUri())),
                 this.properties.getPathPattern())
                 .headerMapper(new DefaultHttpHeaderMapper() {
 
@@ -92,7 +93,8 @@ public class HttpGatewayProcessorConfiguration {
                 })
                 .setTimeout(properties.getTimeout())
                 .requestMapping(requestMapping ->
-                        requestMapping.methods(HttpMethod.POST, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.PUT, HttpMethod.OPTIONS)
+                        requestMapping.methods(HttpMethod.POST, HttpMethod.GET, HttpMethod.DELETE, HttpMethod.PUT,
+                                HttpMethod.OPTIONS)
                                 .consumes(consumes))
                 .crossOrigin(crossOrigin ->
                         crossOrigin.origin(this.properties.getCors().getAllowedOrigins())

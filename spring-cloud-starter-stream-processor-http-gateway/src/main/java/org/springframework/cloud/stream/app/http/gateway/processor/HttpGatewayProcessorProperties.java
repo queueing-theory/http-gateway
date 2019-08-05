@@ -49,7 +49,10 @@ public class HttpGatewayProcessorProperties {
             "X-*"
     };
 
-    private String resourceLocationUri;
+    /**
+     * Base URI where externalized contents will be stored.
+     */
+    private String resourceLocationUri = "file:///tmp";
 
     /**
      * CORS properties.
