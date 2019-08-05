@@ -94,13 +94,13 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
         ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
         Continuation continuation = Continuations.getContinuation(servletRequest, timeout);
         request.getHeaders().set(CONTINUATION_ID, continuation.getId().toString());
-        RequestEntity<Object> httpEntity = prepareRequestEntity(request);
         Message<?> responseMessage = continuation.dispatch(servletRequest);
         try {
             if (continuation.isExpired()) {
                 response.setStatusCode(HttpStatus.GATEWAY_TIMEOUT);
             } else {
                 if (responseMessage == null) {
+                    RequestEntity<Object> httpEntity = prepareRequestEntity(request);
                     responseMessage = doHandleRequest(servletRequest, httpEntity, servletResponse);
                 }
                 if (responseMessage != null) {
