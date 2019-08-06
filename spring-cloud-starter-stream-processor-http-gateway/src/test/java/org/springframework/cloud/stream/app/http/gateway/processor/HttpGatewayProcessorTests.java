@@ -23,7 +23,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -47,7 +46,7 @@ public abstract class HttpGatewayProcessorTests {
 
     @TestPropertySource(properties = {"server.port=1234", "http-gateway.timeout=10000",
             "logging.level.org.springframework.integration.http.inbound.continuation.AsyncContextContinuation=DEBUG",
-            "http-gateway.resourceLocationUri=file://tmp/files/{uuid}/{yyyy}/{MM}/{dd}/{HH}-{mm}-{ss}/"})
+            "http-gateway.resourceLocationUri=file://tmp/files/{yyyy}/{MM}/{dd}/{HH}-{mm}-{ss}/{key}{extension}"})
     public static class DefaultHttpGatewayProcessorTests extends HttpGatewayProcessorTests {
 
         @Autowired

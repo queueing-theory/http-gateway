@@ -167,15 +167,16 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
         if (request instanceof MultipartHttpInputMessage) {
             ArrayNode arrayNode = objectMapper.createArrayNode();
             LinkedMultiValueMap<String, Object> linkedMultiValueMap = (LinkedMultiValueMap<String, Object>) requestBody;
+            String serverName = request.getServletRequest().getServerName();
+            String pathInfo = request.getServletRequest().getPathInfo();
             for (Entry<String, List<Object>> entry : Objects.requireNonNull(linkedMultiValueMap).entrySet()) {
                 String name = entry.getKey();
                 List<Object> objects = entry.getValue();
                 for (Object o : objects) {
                     if (o instanceof UploadedMultipartFile) {
                         UploadedMultipartFile multipartFile = (UploadedMultipartFile) o;
-
                         ObjectNode objectNode = objectMapper.createObjectNode();
-                        URI uri = resourceLoaderSupport.externalize(multipartFile.getResource());
+                        URI uri = resourceLoaderSupport.externalize(serverName + pathInfo, multipartFile.getResource());
                         objectNode.put("formParameterName", multipartFile.getName());
                         objectNode.put("originalFileName", multipartFile.getOriginalFilename());
                         objectNode.put("contentType", multipartFile.getContentType());

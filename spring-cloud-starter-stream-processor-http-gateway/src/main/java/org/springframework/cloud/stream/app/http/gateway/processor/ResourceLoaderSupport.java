@@ -24,18 +24,17 @@ public class ResourceLoaderSupport {
     private String location;
 
     ResourceLoaderSupport(ResourceLoader resourceLoader, String location) {
-        Assert.isTrue(location.endsWith("/") ^ location.contains("{filename}"),
-                "resourceLocationUri should either end with '/' or has a 'filename' variable");
+        Assert.isTrue(location.endsWith("/") ^ (location.contains("{key}") && location.contains("{extension}")),
+                "resourceLocationUri should either end with '/' or has a 'key' and 'extension' variable");
         this.resourceLoader = resourceLoader;
         this.location = location;
     }
 
-    private static Map<String, Object> createUriVariables(String name) {
+    private static Map<String, Object> createUriVariables(String name, String extension) {
         LocalDateTime localDateTime = LocalDateTime.now();
         Map<String, Object> variables = new HashMap<>();
-        variables.put("uuid", UUID.nameUUIDFromBytes(name.getBytes()));
-        variables.put("random_uuid", UUID.randomUUID().toString());
-        variables.put("filename", Objects.requireNonNull(name));
+        variables.put("key", Objects.requireNonNull(name));
+        variables.put("extension", Objects.requireNonNull(extension));
         variables.put("yyyy", localDateTime.getYear());
         variables.put("MM", String.format("%02d", localDateTime.getMonthValue()));
         variables.put("dd", String.format("%02d", localDateTime.getDayOfMonth()));
@@ -45,12 +44,12 @@ public class ResourceLoaderSupport {
         return Collections.unmodifiableMap(variables);
     }
 
-    public URI externalize(Resource resource) throws IOException {
-
-        Resource target = createResource(resource.getFilename());
-        if (!target.exists() && target.isFile()) {
-            Files.createDirectories(target.getFile().getParentFile().toPath());
-        }
+    public URI externalize(String prefix, Resource resource) throws IOException {
+        String filename = resource.getFilename();
+        String name = filename.substring(0, filename.lastIndexOf('.'));
+        String extension = filename.substring(filename.lastIndexOf('.'));
+        String key = prefix + "/" + UUID.nameUUIDFromBytes(name.getBytes()).toString();
+        Resource target = createResource(key, extension);
         WritableResource writableResource = (WritableResource) target;
         try (OutputStream outputStream = writableResource.getOutputStream()) {
             IOUtils.copy(resource.getInputStream(), outputStream);
@@ -58,12 +57,12 @@ public class ResourceLoaderSupport {
         return target.getURI();
     }
 
-    public Resource createResource(String name) throws IOException {
+    public Resource createResource(String name, String extension) throws IOException {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(location);
         if (location.endsWith("/")) {
-            uriComponentsBuilder.path(name);
+            uriComponentsBuilder.path(name + extension);
         }
-        String uriString = uriComponentsBuilder.buildAndExpand(createUriVariables(name)).toString();
+        String uriString = uriComponentsBuilder.buildAndExpand(createUriVariables(name, extension)).toString();
         Resource resource = resourceLoader.getResource(uriString);
         if (!resource.exists() && resource.isFile()) {
             if (!resource.getFile().getParentFile().exists()) {
