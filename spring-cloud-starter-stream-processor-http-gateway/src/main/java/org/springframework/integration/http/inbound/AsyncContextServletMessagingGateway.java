@@ -18,6 +18,7 @@ import org.springframework.integration.http.multipart.UploadedMultipartFile;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.*;
 import org.springframework.web.HttpRequestHandler;
@@ -79,6 +80,22 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
         this.resourceLoaderSupport = resourceLoaderSupport;
     }
 
+    /**
+     * Do not use @StreamListener because it will corrupt gzipped payload.
+     */
+    protected void doStart() {
+        SubscribableChannel channel = (SubscribableChannel) this.getReplyChannel();
+        channel.subscribe(message -> {
+            String continuationId = message.getHeaders().get(CONTINUATION_ID, String.class);
+            Continuation continuation = Continuations.getContinuation(Integer.parseInt(continuationId));
+            if (continuation != null && !continuation.isExpired()) {
+                continuation.setReply(message);
+            } else {
+                logger.warn("Client connection with " + continuationId + " has timed out. Failed to respond with message: " + message);
+            }
+        });
+    }
+
     public void setConvertExceptions(boolean convertExceptions) {
         this.convertExceptions = convertExceptions;
     }
@@ -101,15 +118,14 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
             } else {
                 if (responseMessage == null) {
                     RequestEntity<Object> httpEntity = prepareRequestEntity(request);
-                    responseMessage = doHandleRequest(servletRequest, httpEntity, servletResponse);
-                }
-                if (responseMessage != null) {
+                    doHandleRequest(servletRequest, httpEntity, servletResponse);
+                } else {
                     Boolean isReference = responseMessage.getHeaders().get("is_reference", Boolean.class);
                     if (isReference != null && isReference) {
                         Object payload = responseMessage.getPayload();
                         JsonNode jsonNode;
-                        if (payload instanceof String) {
-                            jsonNode = objectMapper.readTree((String) payload);
+                        if (payload instanceof byte[]) {
+                            jsonNode = objectMapper.readTree((byte[])payload);
                         } else {
                             jsonNode = objectMapper.valueToTree(payload);
                         }

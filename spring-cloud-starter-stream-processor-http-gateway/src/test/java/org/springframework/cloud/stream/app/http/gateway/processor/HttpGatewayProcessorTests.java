@@ -125,7 +125,7 @@ public abstract class HttpGatewayProcessorTests {
                 ObjectNode objectNode = objectMapper.createObjectNode();
                 objectNode.put("original_content_type", MediaType.IMAGE_JPEG.toString());
                 objectNode.put("uri", "classpath:1MB_file");
-                message = MessageBuilder.withPayload(objectNode).setHeader("is_reference", true)
+                message = MessageBuilder.withPayload(objectNode.toString().getBytes()).setHeader("is_reference", true)
                         .setHeader("continuation_id", message.getHeaders().get("continuation_id", String.class))
                         .build();
                 channels.input().send(message);

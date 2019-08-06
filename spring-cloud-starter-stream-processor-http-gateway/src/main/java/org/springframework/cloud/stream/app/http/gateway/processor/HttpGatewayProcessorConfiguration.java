@@ -44,10 +44,6 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 @ComponentScan
 public class HttpGatewayProcessorConfiguration {
 
-    protected final Log logger = LogFactory.getLog(HttpGatewayProcessorConfiguration.class);
-
-    private static final String CONTINUATION_ID = "continuation_id";
-
     @Autowired
     private Processor channels;
 
@@ -102,19 +98,6 @@ public class HttpGatewayProcessorConfiguration {
                                 .allowCredentials(this.properties.getCors().getAllowCredentials()))
                 .requestChannel(this.channels.output())
                 .replyChannel(this.channels.input());
-    }
-
-    @StreamListener(Processor.INPUT)
-    public void asyncReply(Message<?> message) {
-        String continuationId = message.getHeaders().get(CONTINUATION_ID, String.class);
-        Continuation continuation = Continuations.getContinuation(Integer.parseInt(continuationId));
-        if (continuation != null && !continuation.isExpired()) {
-            continuation.setReply(message);
-        } else {
-            logger.warn(
-                    "Client connection with " + continuationId + " has timed out. Failed to respond with message: "
-                            + message);
-        }
     }
 
     @Bean
