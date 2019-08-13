@@ -192,11 +192,11 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
                     if (o instanceof UploadedMultipartFile) {
                         UploadedMultipartFile multipartFile = (UploadedMultipartFile) o;
                         ObjectNode objectNode = objectMapper.createObjectNode();
-                        URI uri = resourceLoaderSupport.externalize(serverName + pathInfo, multipartFile.getResource());
+                        String uriString = resourceLoaderSupport.externalize(serverName + pathInfo, multipartFile.getResource());
                         objectNode.put("formParameterName", multipartFile.getName());
                         objectNode.put("originalFileName", multipartFile.getOriginalFilename());
                         objectNode.put("contentType", multipartFile.getContentType());
-                        objectNode.put("uri", uri.toString());
+                        objectNode.put("uri", uriString);
                         arrayNode.add(objectNode);
 
                     } else {

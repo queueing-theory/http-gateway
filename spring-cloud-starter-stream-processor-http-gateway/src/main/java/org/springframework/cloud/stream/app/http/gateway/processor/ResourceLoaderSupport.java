@@ -2,7 +2,6 @@ package org.springframework.cloud.stream.app.http.gateway.processor;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -44,25 +43,29 @@ public class ResourceLoaderSupport {
         return Collections.unmodifiableMap(variables);
     }
 
-    public URI externalize(String prefix, Resource resource) throws IOException {
+    public String externalize(String prefix, Resource resource) throws IOException {
         String filename = resource.getFilename();
         String name = filename.substring(0, filename.lastIndexOf('.'));
         String extension = filename.substring(filename.lastIndexOf('.'));
         String key = prefix + "/" + UUID.nameUUIDFromBytes(name.getBytes()).toString();
-        Resource target = createResource(key, extension);
+        String uriPath = uriPath(key, extension);
+        Resource target = createResource(uriPath);
         WritableResource writableResource = (WritableResource) target;
         try (OutputStream outputStream = writableResource.getOutputStream()) {
             IOUtils.copy(resource.getInputStream(), outputStream);
         }
-        return target.getURI();
+        return uriPath;
     }
 
-    public Resource createResource(String name, String extension) throws IOException {
+    private String uriPath(String name, String extension) {
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(location);
         if (location.endsWith("/")) {
             uriComponentsBuilder.path(name + extension);
         }
-        String uriString = uriComponentsBuilder.buildAndExpand(createUriVariables(name, extension)).toString();
+        return uriComponentsBuilder.buildAndExpand(createUriVariables(name, extension)).toString();
+    }
+
+    public Resource createResource(String uriString) throws IOException {
         Resource resource = resourceLoader.getResource(uriString);
         if (!resource.exists() && resource.isFile()) {
             if (!resource.getFile().getParentFile().exists()) {
