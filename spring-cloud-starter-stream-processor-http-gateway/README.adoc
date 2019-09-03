@@ -29,7 +29,7 @@ $$http-gateway.cors.allowed-origins$$:: $$List of allowed origins, e.g. "https:/
 $$http-gateway.mapped-request-headers$$:: $$Http Request Headers that will be mapped.$$ *($$String[]$$, default: `$$<none>$$`)*
 $$http-gateway.mapped-response-headers$$:: $$Http Response Headers that will be mapped.$$ *($$String[]$$, default: `$$<none>$$`)*
 $$http-gateway.path-pattern$$:: $$An Ant-Style pattern to determine which http requests will be captured.$$ *($$String$$, default: `$$/$$`)*
-$$http-gateway.resource-location-uri$$:: $$Base URI where externalized contents will be stored.$$ *($$String$$, default: `$$file:///tmp$$`)*
+$$http-gateway.resource-location-uri$$:: $$Base URI where externalized contents will be stored.$$ *($$String$$, default: `$$file:///tmp/$$`)*
 $$http-gateway.timeout$$:: $$Timeout value for the connection$$ *($$Long$$, default: `$$300000$$`)*
 $$server.port$$:: $$Server HTTP port.$$ *($$Integer$$, default: `$$8080$$`)*
 //end::configuration-properties[]

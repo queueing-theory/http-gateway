@@ -1,13 +1,8 @@
 package org.springframework.cloud.stream.app.http.gateway.processor;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -18,14 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.integration.http.dsl.AsyncContextServletEndpointSpec;
 import org.springframework.integration.http.inbound.AsyncContextServletMessagingGateway;
 import org.springframework.integration.http.inbound.HttpRequestHandlingEndpointSupport;
-import org.springframework.integration.http.inbound.continuation.Continuation;
-import org.springframework.integration.http.inbound.continuation.Continuations;
 import org.springframework.integration.http.support.DefaultHttpHeaderMapper;
-import org.springframework.messaging.Message;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.util.MimeType;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A processor module that listens for HTTP requests and emits the body as a message payload. If the Content-Type

@@ -17,7 +17,7 @@ public class HttpGatewayProcessorProperties {
     /**
      * HTTP endpoint path mapping.
      */
-    private String pathPattern = "**/*";
+    private String pathPattern = "**";
 
     /**
      * Timeout value for the connection
@@ -52,7 +52,7 @@ public class HttpGatewayProcessorProperties {
     /**
      * Base URI where externalized contents will be stored.
      */
-    private String resourceLocationUri = "file:///tmp";
+    private String resourceLocationUri = "file:///tmp/";
 
     /**
      * CORS properties.
