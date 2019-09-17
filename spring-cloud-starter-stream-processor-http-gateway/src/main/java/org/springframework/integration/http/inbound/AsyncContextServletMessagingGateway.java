@@ -39,8 +39,7 @@ import java.util.Objects;
  * Otherwise, the gateway will play the role of a unidirectional Channel Adapter with a simple status-based response
  * (e.g. 200 OK).
  * <p>
- * The default supported request methods are GET and POST, but the list of values can be configured with the {@link
- * RequestMapping#methods} property. The payload generated from a GET request (or HEAD or OPTIONS if supported) will be
+ * The default supported request methods are GET and POST, but the list of values can be configured with the  property. The payload generated from a GET request (or HEAD or OPTIONS if supported) will be
  * a {@link MultiValueMap} containing the parameter values. For a request containing a body (e.g. a POST), the type of
  * the payload is determined by the {@link #setRequestPayloadTypeClass(Class)} request payload type}.
  * <p>
@@ -108,6 +107,11 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
             throws IOException {
         Object responseContent = null;
         ServletServerHttpRequest request = prepareRequest(servletRequest);
+        MediaType contentType = request.getHeaders().getContentType();
+        if (contentType != null && contentType.getCharset() != null) {
+            MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype());
+            request.getHeaders().setContentType(mediaType);
+        }
         ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
         Continuation continuation = Continuations.getContinuation(servletRequest, timeout);
         request.getHeaders().set(CONTINUATION_ID, continuation.getId().toString());

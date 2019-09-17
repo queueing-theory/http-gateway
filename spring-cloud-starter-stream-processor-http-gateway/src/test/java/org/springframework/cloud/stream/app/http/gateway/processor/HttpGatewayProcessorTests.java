@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -66,6 +67,7 @@ public abstract class HttpGatewayProcessorTests {
             thread.start();
 
             HttpUriRequest request = new HttpGet("http://localhost:1234/test");
+            request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
             HttpResponse response = HttpClientBuilder.create().build().execute(request);
             assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
         }
