@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.cloud.stream.app.http.gateway.processor.ResourceLoaderSupport;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -202,11 +203,13 @@ public class AsyncContextServletMessagingGateway extends HttpRequestHandlingEndp
                         objectNode.put("contentType", multipartFile.getContentType());
                         objectNode.put("uri", uriString);
                         arrayNode.add(objectNode);
-
-                    } else {
-                        ObjectNode objectNode = objectMapper.createObjectNode();
-                        objectNode.set(name, objectMapper.valueToTree(o));
-                        arrayNode.add(objectNode);
+                    } else if(o instanceof String[]) {
+                        String[] values = (String[]) o;
+                        for (String value : values) {
+                            ObjectNode objectNode = objectMapper.createObjectNode();
+                            objectNode.put(name, value);
+                            arrayNode.add(objectNode);
+                        }
                     }
                 }
             }
